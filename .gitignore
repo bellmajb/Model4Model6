@@ -17,3 +17,6 @@
 
 # Simulink Code Generation
 slprj/
+
+#figs
+*.fig
