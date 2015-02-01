@@ -1,6 +1,11 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%   Unimodal determines based on peaks and locations  %%%
+%%%    of those peaks if a solution is periodic         %%% 
+%%%                   and unimodal.                     %%%
+%%%              Jacob Bellman, 2/1/2015                %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function [mode,period] = unimodal(T,y,locs,TP,NP,Tthresh,Pthresh)
-% unimodal determines based on peaks and locations of those peaks
-% if a solution is periodic and unimodal
     
     Tdiff1=zeros(NP,1);  % vector to hold time between peaks
     Lastpeaks1=zeros(NP,1); % vector to hold peak values of Mp

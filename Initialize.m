@@ -13,4 +13,11 @@ options = odeset('RelTol',1e-5,'AbsTol',[1e-5 1e-5 1e-5 1e-5 1e-5 1e-5]);
 W0=0.5296776; Fm0=0.958658; Fp0=0.7892854; WFp0=0.3232268;
 Mp0=199.3611; Ma0=143.3817;
 
-IntTime=2000;  % Integration Time
+% Integration time for all programs 
+% besides CellCycleHist. 
+IntTime=2000;
+
+% Integration time for CellCycleHist. Needs
+% to be longer to calculate enough cell
+% cycle lengths.
+IntTime4Hist=10000;

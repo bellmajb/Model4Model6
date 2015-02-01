@@ -7,30 +7,24 @@
 %%%    analyzing peaks of the inactive form of MPF (Mp).   %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-clear all
+clear all   
 
-global MDT    % cell cycle uncoupled mass doubling time
-global ep     % coupling factor
+MDT=24;  % cell cycle uncoupled mass doubling time
+ep=0.5;  % coupling factor
 
-% options for solving the ode each time
-options = odeset('RelTol',1e-5,'AbsTol',[1e-5 1e-5 1e-5 1e-5 1e-5 1e-5]);
-
-% Initial Conditions for solving the ode each time that
-% begin at Fm Max and Mp Max without coupling
-W0=0.5296776; Fm0=0.958658; Fp0=0.7892854; WFp0=0.3232268;
-Mp0=199.3611; Ma0=143.3817;
+Initialize
 
 % Determines the grid of the Arnold Tongue plot
-E1=0; E2=16; M1=1; M2=50;  % Smallest and largest values of eps and MDT for grid
-Esteps=2; Msteps=2;        % Number of steps of eps and MDT for grid
+E1=0; E2=16;  % Smallest and largest values of ep for grid
+M1=1; M2=50;  % Smallest and largest values of MDT for grid
+Esteps=2; Msteps=2;          % Number of steps of ep and MDT for grid
 Tthresh=0.01; Pthresh=0.01;  % Thresholds for periods and peaks to converge
 
 % vectors containing all ep and MDT values
 epvec=linspace(E1,E2,Esteps);
 MDTvec=linspace(M1,M2,Msteps);
 
-NP=20;       % Number of peaks considered
-IntTime=2000;    % Integration Time
+NP=20;   % Number of peaks considered
 
 % Matrix for holding modal numbers (SynchMat(:,:,1))
 % and periods (SynchMat(:,:,2)) associated with ep and MDT
@@ -44,10 +38,12 @@ for i=1:Esteps
     ep=epvec(i);
     for j=1:Msteps
         MDT=MDTvec(j);
-        [T,y] = ode45(@JacobsCoupled,[0 IntTime],[W0 Fm0 Fp0 WFp0 Mp0 Ma0],options);
-        [pks,locs]=findpeaks(y(:,5));  % Determine local maximums
-        TP=length(pks);  % total number of peaks found
-        % make sure there are enough peaks to consider
+        [T,y] = ode45(@(t,y)JacobsCoupled(t,y,MDT,ep),[0 IntTime4Hist],...
+                      [W0 Fm0 Fp0 WFp0 Mp0 Ma0],options);
+        [pks,locs]=findpeaks(y(:,5));  % Determine local maximums of Mp
+        TP=length(pks);                % Total number of peaks found
+        
+        % Make sure there are enough peaks to consider
         if (NP>TP)
             SynchMat(i,j,1)=0;    %solution is not periodic
             SynchMat(i,j,2)=0;
@@ -78,7 +74,8 @@ end
 
 close(h)
 
-% somehow visualize the outcome
+% Plotting Information
+figure
 A=SynchMat(:,:,2);
 h=image(MDTvec,epvec,A);
 set(gca,'YDir','normal');
@@ -89,5 +86,5 @@ ylabel('Coupling Strength (\epsilon)')
 title('Arnold Tongue','FontSize',18,'FontWeight','bold')
 t=colorbar('peer',gca);
 set(get(t,'title'),'String','Entrained MDT')
-str=sprintf('ArnoldTongue%dby%d.fig',Esteps,Msteps);
+str=sprintf(['ArnoldTongue' num2str(Esteps) 'by' num2str(Msteps) '.fig']);
 saveas(h,str)

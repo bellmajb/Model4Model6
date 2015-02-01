@@ -1,6 +1,11 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%   Bimodal determines based on peaks and locations  %%%
+%%%    of those peaks if a solution is periodic        %%% 
+%%%                   and bimodal.                     %%%
+%%%              Jacob Bellman, 2/1/2015               %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function [mode,period] = bimodal(T,y,locs,TP,NP,Tthresh,Pthresh)
-% bimodal determines based on peaks and locations of those peaks
-% if a solution is periodic and bimodal
     
     Tdiff2=zeros(floor(NP/2),1);  % vector to hold time between every other peak
     Lastpeaks2=zeros(floor(NP/2),1); % vector to hold every other peak value of Mp

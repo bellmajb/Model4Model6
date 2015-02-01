@@ -1,55 +1,51 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% The following program solves JacobsCoupled  ODEs, finds %%% 
-%%%  peaks of Mp, and plots the resulting histogram of the  %%%
-%%%      distribution of cell cycle lengths for a given     %%%
-%%%   coupling strength (ep) and mass doubling time (MDT)   %%%        
-%%%                  Jacob Bellman, 1/22/2015               %%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%   The following program solves JacobsCoupled ODEs   %%% 
+%%%       for a specified combination of coupling       %%%
+%%%  strength (ep) and mass doubling time (MDT), finds  %%%   
+%%%  peaks of Mp, and plots the resulting histogram of  %%%
+%%%      the distribution of cell cycle lengths.        %%%        
+%%%               Jacob Bellman, 1/22/2015              %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
-clear all
+clear all   
 
-global MDT   % cell cycle uncoupled mass doubling time
-global ep    % coupling factor
+MDT=24; % cell cycle uncoupled mass doubling time
+ep=0.5;  % coupling factor
 
-MDT=24; ep=15;
-
-% options for solving the ode each time
-options = odeset('RelTol',1e-5,'AbsTol',[1e-5 1e-5 1e-5 1e-5 1e-5 1e-5]);
-
-% Initial Conditions for solving the ode each time that
-% begin at Fm Max and Mp Max without coupling
-W0=0.5296776; Fm0=0.958658; Fp0=0.7892854; WFp0=0.3232268;
-Mp0=199.3611; Ma0=143.3817;
-
-IntTime=10000;  % Integration Time
+% Initialize.m specifies integration specifications
+% (IntTime, Initial Values, options)
+Initialize  
 
 % Solve the ODE
-[T,y] = ode45(@JacobsCoupled,[0 IntTime],[W0 Fm0 Fp0 WFp0 Mp0 Ma0],options);
+[T,y] = ode45(@(t,y)JacobsCoupled(t,y,MDT,ep),[0 IntTime4Hist],...
+              [W0 Fm0 Fp0 WFp0 Mp0 Ma0],options);
 
-% Find all peaks, locations of peaks, and number of peaks
+% Find the location of all peaks and their values
 [pks,locs]=findpeaks(y(:,5)); 
 numpeaks = length(peaks);
 
 % Find time distances between peaks
 peakdiffs = zeros(numpeaks-1,1);
-for i=1:numpeaks-1
-    
-    peakdiffs(i) = T(locs(i+1))-T(locs(i));
-    
-end
+ii=1:numpeaks-1;
+peakdiffs(ii) = T(locs(ii+1))-T(locs(ii));
 
 % Determine the width of the plotting frame
 mindiffs = min(peakdiffs);
 maxdiffs = max(peakdiffs);
+
+% Take 10% of the median of all cell cycle lengths (q)
+% and lengthen the plotting q above and below the max
+% and mins, respectively.
 q=(maxdiffs-mindiffs)/10;
-histlow=mindiffs-q; histhigh=maxdiffs+q; % Smallest and largest values for hist
-histsteps=20;   % Number of bars
-histedges=linspace(histlow,histhigh,histsteps);  % Edges for the histogram bars
+histlow=mindiffs-q; histhigh=maxdiffs+q;
 
-% Integration Time
-IntTime=10000;
+% Number of bars for the histogram
+histsteps=20;                                    
 
-% Information for Histogram
+% Edges for the histogram bars
+histedges=linspace(histlow,histhigh,histsteps);  
+
+% Calculate the histogram counts for bar heights
 [counts]=histc(peakdiffs,histedges);
 
 % Plotting information
@@ -57,8 +53,8 @@ figure
 h=bar(histedges,counts,'histc');
 xlabel('Cell Cycle Length (h)','FontSize',14)
 ylabel('Count','FontSize',14)
-str1=sprintf('Histogram of Cell Cycle Lengths, \n MDT=%d, ep=%0.1f', MDT, ep);
+str1=char({'Histogram of Cell Cycle Lengths', ...
+          ['MDT = ' num2str(MDT) ', ep = ' num2str(ep)]});
 title(str1,'FontSize',18,'FontWeight','bold')
-str2=sprintf('examplefig%dby%d.fig',MDT,ep);
+str2=sprintf(['CellCycleHistMDT' num2str(MDT) 'ep' num2str(ep) '.fig']);
 saveas(h,str2)
-
